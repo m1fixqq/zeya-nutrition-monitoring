@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Личный кабинет образовательной организации для ежедневной подачи отчётов об организации горячего и льготного питания.">
+  <meta name="theme-color" content="#0a2d57">
+  <title>Личный кабинет организации — Отдел образования Зейского муниципального округа</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="/js/app.js" defer></script>
+</head>
+<body class="page">
+  <a class="page__skip-link" href="#main">Перейти к содержимому</a>
+
+  <header class="header">
+    <div class="header__top">
+      <div class="container header__top-inner">
+        <span class="header__label">Официальный внутренний портал</span>
+        <a class="header__link" href="/admin">Панель отдела образования</a>
+      </div>
+    </div>
+    <div class="container header__main">
+      <div class="header__brand">
+        <div class="header__emblem" aria-hidden="true">
+          <span class="header__emblem-text">ЗМО</span>
+        </div>
+        <div class="header__titles">
+          <p class="header__eyebrow">Муниципальное казённое учреждение</p>
+          <p class="header__title">
+            Отдел образования администрации<br>
+            Зейского муниципального округа
+          </p>
+        </div>
+      </div>
+      <p class="header__subtitle">
+        Мониторинг горячего<br>и льготного питания
+      </p>
+    </div>
+  </header>
+
+  <main id="main" class="main">
+    <div class="container">
+      <nav class="breadcrumbs" aria-label="Хлебные крошки">
+        <span class="breadcrumbs__item">Главная</span>
+        <span class="breadcrumbs__separator">/</span>
+        <span class="breadcrumbs__item breadcrumbs__item_state_current" aria-current="page">
+          Личный кабинет организации
+        </span>
+      </nav>
+
+      <div id="loadingView" class="loading" aria-live="polite">
+        <span class="loading__spinner" aria-hidden="true"></span>
+        <span class="loading__text">Проверка авторизации…</span>
+      </div>
+
+      <section id="loginView" class="auth" hidden>
+        <div class="auth__intro">
+          <p class="auth__eyebrow">Ежедневная отчётность</p>
+          <h1 class="auth__title">
+            Личный кабинет<br>
+            образовательной организации
+          </h1>
+          <p class="auth__lead">
+            Портал предназначен для ежедневной подачи сведений
+            об организации горячего и льготного питания.
+          </p>
+          <p class="auth__date">
+            <span class="auth__date-label">Отчётная дата</span>
+            <strong class="auth__date-value" id="todayLabel">—</strong>
+          </p>
+          <p class="auth__note">
+            Доступ предоставляется только представителям образовательных
+            организаций.
+          </p>
+        </div>
+
+        <div class="auth__panel">
+          <h2 class="auth__panel-title">Вход в систему</h2>
+          <form id="loginForm" class="form auth__form" novalidate>
+            <div class="form__field">
+              <label class="form__label" for="login">Логин</label>
+              <input
+                class="form__input"
+                type="text"
+                id="login"
+                name="login"
+                autocomplete="username"
+                autocapitalize="none"
+                spellcheck="false"
+                placeholder="Введите логин"
+                required
+              >
+            </div>
+
+            <div class="form__field">
+              <label class="form__label" for="password">Пароль</label>
+              <input
+                class="form__input"
+                type="password"
+                id="password"
+                name="password"
+                autocomplete="current-password"
+                placeholder="Введите пароль"
+                required
+              >
+            </div>
+
+            <p id="loginError" class="form__error" role="alert" hidden></p>
+
+            <button
+              type="submit"
+              id="loginSubmit"
+              class="button button_view_primary button_size_full form__submit"
+            >
+              Войти в личный кабинет
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <section id="reportView" class="report" hidden>
+        <div class="report__head">
+          <div>
+            <p class="report__eyebrow">Личный кабинет организации</p>
+            <h1 class="report__title" id="schoolName">—</h1>
+            <p class="report__lead">
+              Ежедневный отчёт об организации горячего и льготного питания
+            </p>
+          </div>
+          <button id="logoutBtn" class="button button_view_outline" type="button">
+            Выйти
+          </button>
+        </div>
+
+        <div class="report__panel">
+          <div class="report__meta">
+            <div class="report__meta-item">
+              <span class="report__meta-label">Отчётная дата</span>
+              <strong class="report__date" id="reportDate">—</strong>
+            </div>
+            <span id="reportStatus" class="status status_value_pending">Не сдан</span>
+          </div>
+
+          <div id="reportSuccess" class="notice notice_type_success" role="status" hidden>
+            <strong class="notice__title">Отчёт успешно сдан</strong>
+            <p class="notice__text">
+              Сведения за <span id="successDate">—</span> приняты.
+              Повторная отправка за эту дату недоступна.
+            </p>
+          </div>
+
+          <div id="reportError" class="notice notice_type_error" role="alert" hidden></div>
+
+          <form id="reportForm" class="form" novalidate>
+            <fieldset id="reportFieldset" class="form__group">
+              <legend class="visually-hidden">Показатели питания за текущую дату</legend>
+
+              <div class="form__field">
+                <label class="form__label" for="primaryHot">
+                  Ученики начальных классов с горячим питанием
+                </label>
+                <p class="form__hint">
+                  Численность обучающихся 1–4 классов, получающих горячее питание.
+                </p>
+                <div class="form__control">
+                  <input
+                    class="form__input form__input_attached"
+                    type="number"
+                    id="primaryHot"
+                    name="primaryHot"
+                    min="0"
+                    max="100000"
+                    step="1"
+                    inputmode="numeric"
+                    placeholder="0"
+                    required
+                  >
+                  <span class="form__unit">чел.</span>
+                </div>
+              </div>
+
+              <div class="form__field">
+                <label class="form__label" for="beneficiaries">Льготники</label>
+                <p class="form__hint">
+                  Численность обучающихся, получающих питание на льготной основе.
+                </p>
+                <div class="form__control">
+                  <input
+                    class="form__input form__input_attached"
+                    type="number"
+                    id="beneficiaries"
+                    name="beneficiaries"
+                    min="0"
+                    max="100000"
+                    step="1"
+                    inputmode="numeric"
+                    placeholder="0"
+                    required
+                  >
+                  <span class="form__unit">чел.</span>
+                </div>
+              </div>
+
+              <div class="form__field">
+                <label class="form__label" for="paying">Плательщики</label>
+                <p class="form__hint">
+                  Численность обучающихся, питающихся за счёт средств родителей
+                  (законных представителей).
+                </p>
+                <div class="form__control">
+                  <input
+                    class="form__input form__input_attached"
+                    type="number"
+                    id="paying"
+                    name="paying"
+                    min="0"
+                    max="100000"
+                    step="1"
+                    inputmode="numeric"
+                    placeholder="0"
+                    required
+                  >
+                  <span class="form__unit">чел.</span>
+                </div>
+              </div>
+            </fieldset>
+
+            <button
+              type="submit"
+              id="reportSubmit"
+              class="button button_view_primary button_size_full form__submit"
+            >
+              Отправить отчёт за сегодня
+            </button>
+            <p class="form__note">
+              После отправки изменить данные за текущую дату невозможно.
+            </p>
+          </form>
+        </div>
+      </section>
+
+      <noscript>
+        <div class="notice notice_type_error">
+          Для работы личного кабинета необходимо включить JavaScript в браузере.
+        </div>
+      </noscript>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="footer__text">
+        МКУ «Отдел образования администрации<br>
+        Зейского муниципального округа»
+      </p>
+      <p class="footer__note">
+        Внутренний портал · 2026
+      </p>
+    </div>
+  </footer>
+</body>
+</html>

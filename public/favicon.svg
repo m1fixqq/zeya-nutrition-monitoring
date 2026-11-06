@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Зейский муниципальный округ">
+  <path fill="#0a2d57" d="M32 2 58 10v22c0 15-11 26-26 30C17 58 6 47 6 32V10Z"/>
+  <path fill="none" stroke="#c2a15a" stroke-width="2" d="M32 7 53 13v19c0 12-9 21-21 25-12-4-21-13-21-25V13Z"/>
+  <path fill="#ffffff" d="M22 17h20v5H31l10 13v5H21v-5h11L22 22Z"/>
+  <rect x="21" y="44" width="22" height="2" fill="#c2a15a"/>
+</svg>

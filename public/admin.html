@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Сводная панель отдела образования: ежедневный мониторинг горячего и льготного питания в образовательных организациях Зейского муниципального округа.">
+  <meta name="theme-color" content="#0a2d57">
+  <title>Панель отдела образования — Отдел образования Зейского муниципального округа</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="/js/admin.js" defer></script>
+</head>
+<body class="page">
+  <a class="page__skip-link" href="#main">Перейти к содержимому</a>
+
+  <header class="header">
+    <div class="header__top">
+      <div class="container header__top-inner">
+        <span class="header__label">Официальный внутренний портал</span>
+        <a class="header__link" href="/">Личный кабинет организации</a>
+      </div>
+    </div>
+    <div class="container header__main">
+      <div class="header__brand">
+        <div class="header__emblem" aria-hidden="true">
+          <span class="header__emblem-text">ЗМО</span>
+        </div>
+        <div class="header__titles">
+          <p class="header__eyebrow">Муниципальное казённое учреждение</p>
+          <p class="header__title">
+            Отдел образования администрации<br>
+            Зейского муниципального округа
+          </p>
+        </div>
+      </div>
+      <p class="header__subtitle">
+        Мониторинг горячего<br>и льготного питания
+      </p>
+    </div>
+  </header>
+
+  <main id="main" class="main">
+    <div class="container">
+      <nav class="breadcrumbs" aria-label="Хлебные крошки">
+        <span class="breadcrumbs__item">Главная</span>
+        <span class="breadcrumbs__separator">/</span>
+        <span class="breadcrumbs__item breadcrumbs__item_state_current" aria-current="page">
+          Панель отдела образования
+        </span>
+      </nav>
+
+      <section class="dashboard" aria-labelledby="dashboardTitle">
+        <div class="dashboard__head">
+          <p class="dashboard__eyebrow">Сводный мониторинг</p>
+          <h1 class="dashboard__title" id="dashboardTitle">
+            Питание в образовательных организациях
+          </h1>
+          <p class="dashboard__lead">
+            Оперативная сводка на <strong class="dashboard__date" id="dashboardDate">—</strong>
+          </p>
+        </div>
+
+        <div id="dashboardError" class="notice notice_type_error" role="alert" hidden></div>
+
+        <div class="dashboard__panel">
+          <div class="dashboard__table-wrap">
+            <table class="report-table">
+              <caption class="visually-hidden">
+                Сводные показатели горячего и льготного питания по организациям
+                Зейского муниципального округа за текущую дату
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col" class="report-table__head-cell report-table__head-cell_type_index">№</th>
+                  <th scope="col" class="report-table__head-cell report-table__head-cell_type_name">
+                    Образовательная организация
+                  </th>
+                  <th scope="col" class="report-table__head-cell report-table__head-cell_type_number">
+                    Начальные классы
+                    <span class="report-table__head-note">горячее питание, чел.</span>
+                  </th>
+                  <th scope="col" class="report-table__head-cell report-table__head-cell_type_number">
+                    Льготники
+                    <span class="report-table__head-note">чел.</span>
+                  </th>
+                  <th scope="col" class="report-table__head-cell report-table__head-cell_type_number">
+                    Плательщики
+                    <span class="report-table__head-note">чел.</span>
+                  </th>
+                  <th scope="col" class="report-table__head-cell report-table__head-cell_type_status">Статус</th>
+                </tr>
+              </thead>
+              <tbody id="dashboardBody">
+                <tr class="report-table__row">
+                  <td class="report-table__cell report-table__cell_type_message" colspan="6">
+                    Загрузка данных…
+                  </td>
+                </tr>
+              </tbody>
+              <tfoot id="dashboardFoot"></tfoot>
+            </table>
+          </div>
+
+          <p class="dashboard__note">
+            В таблице отображаются все образовательные организации района.
+            Строка, отмеченная красным, означает, что организация не представила
+            сведения за текущую дату.
+          </p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="footer__text">
+        МКУ «Отдел образования администрации<br>
+        Зейского муниципального округа»
+      </p>
+      <p class="footer__note">
+        Внутренний портал · 2026
+      </p>
+    </div>
+  </footer>
+</body>
+</html>
