@@ -182,6 +182,12 @@ input:focus-visible {
   min-width: 0;
   align-items: center;
   gap: 18px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.header__brand:hover {
+  text-decoration: none;
 }
 
 .header__emblem {
