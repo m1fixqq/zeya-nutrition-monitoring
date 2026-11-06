@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Служебный вход в панель управления отделом образования Зейского муниципального округа.">
+  <meta name="theme-color" content="#0a2d57">
+  <title>Вход в панель управления — Отдел образования Зейского муниципального округа</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="/js/admin-login.js" defer></script>
+</head>
+<body class="page">
+  <a class="page__skip-link" href="#main">Перейти к содержимому</a>
+
+  <header class="header">
+    <div class="header__top">
+      <div class="container header__top-inner">
+        <span class="header__label">Официальный внутренний портал</span>
+        <span class="header__links">
+          <a class="header__link" href="/">Личный кабинет организации</a>
+          <a class="header__link" href="/admin">Сводная ведомость</a>
+        </span>
+      </div>
+    </div>
+    <div class="container header__main">
+      <div class="header__brand">
+        <div class="header__emblem" aria-hidden="true">
+          <span class="header__emblem-text">ЗМО</span>
+        </div>
+        <div class="header__titles">
+          <p class="header__eyebrow">Муниципальное казённое учреждение</p>
+          <p class="header__title">
+            Отдел образования администрации<br>
+            Зейского муниципального округа
+          </p>
+        </div>
+      </div>
+      <p class="header__subtitle">
+        Мониторинг горячего<br>и льготного питания
+      </p>
+    </div>
+  </header>
+
+  <main id="main" class="main">
+    <div class="container">
+      <nav class="breadcrumbs" aria-label="Хлебные крошки">
+        <span class="breadcrumbs__item">Главная</span>
+        <span class="breadcrumbs__separator">/</span>
+        <a class="breadcrumbs__item" href="/admin">Панель отдела образования</a>
+        <span class="breadcrumbs__separator">/</span>
+        <span class="breadcrumbs__item breadcrumbs__item_state_current" aria-current="page">
+          Вход в панель управления
+        </span>
+      </nav>
+
+      <section class="auth">
+        <div class="auth__intro">
+          <p class="auth__eyebrow">Служебный доступ</p>
+          <h1 class="auth__title">
+            Панель управления<br>
+            отделом образования
+          </h1>
+          <p class="auth__lead">
+            Управление отчётами, пользователями, журналом действий
+            и резервными копиями базы данных.
+          </p>
+          <p class="auth__note">
+            Сводная ведомость за текущую дату остаётся доступной без авторизации
+            по адресу <a href="/admin">/admin</a>.
+          </p>
+        </div>
+
+        <div class="auth__panel">
+          <h2 class="auth__panel-title">Вход администратора</h2>
+          <form id="adminLoginForm" class="form auth__form" novalidate>
+            <div class="form__field">
+              <label class="form__label" for="adminLogin">Логин</label>
+              <input
+                class="form__input"
+                type="text"
+                id="adminLogin"
+                name="login"
+                autocomplete="username"
+                autocapitalize="none"
+                spellcheck="false"
+                placeholder="Введите логин"
+                required
+              >
+            </div>
+
+            <div class="form__field">
+              <label class="form__label" for="adminPassword">Пароль</label>
+              <input
+                class="form__input"
+                type="password"
+                id="adminPassword"
+                name="password"
+                autocomplete="current-password"
+                placeholder="Введите пароль"
+                required
+              >
+            </div>
+
+            <p id="adminLoginError" class="form__error" role="alert" hidden></p>
+
+            <button
+              type="submit"
+              id="adminLoginSubmit"
+              class="button button_view_primary button_size_full form__submit"
+            >
+              Войти в панель управления
+            </button>
+          </form>
+          <p class="form__note">
+            <a href="/admin">Вернуться к сводной ведомости</a>
+          </p>
+        </div>
+      </section>
+
+      <noscript>
+        <div class="notice notice_type_error">
+          Для работы панели управления необходимо включить JavaScript в браузере.
+        </div>
+      </noscript>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="footer__text">
+        МКУ «Отдел образования администрации<br>
+        Зейского муниципального округа»
+      </p>
+      <p class="footer__note">
+        Внутренний портал · 2026
+      </p>
+    </div>
+  </footer>
+</body>
+</html>

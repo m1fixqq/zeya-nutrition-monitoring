@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Административная панель отдела образования: управление отчётами, пользователями, журналом действий и резервными копиями.">
+  <meta name="theme-color" content="#0a2d57">
+  <title>Управление системой — Отдел образования Зейского муниципального округа</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="/js/admin-manage.js" defer></script>
+</head>
+<body class="page">
+  <a class="page__skip-link" href="#main">Перейти к содержимому</a>
+
+  <header class="header">
+    <div class="header__top">
+      <div class="container header__top-inner">
+        <span class="header__label">Официальный внутренний портал</span>
+        <span class="header__links">
+          <a class="header__link" href="/">Личный кабинет организации</a>
+          <a class="header__link" href="/admin">Сводная ведомость</a>
+        </span>
+      </div>
+    </div>
+    <div class="container header__main">
+      <div class="header__brand">
+        <div class="header__emblem" aria-hidden="true">
+          <span class="header__emblem-text">ЗМО</span>
+        </div>
+        <div class="header__titles">
+          <p class="header__eyebrow">Муниципальное казённое учреждение</p>
+          <p class="header__title">
+            Отдел образования администрации<br>
+            Зейского муниципального округа
+          </p>
+        </div>
+      </div>
+      <p class="header__subtitle">
+        Мониторинг горячего<br>и льготного питания
+      </p>
+    </div>
+  </header>
+
+  <main id="main" class="main">
+    <div class="container">
+      <nav class="breadcrumbs" aria-label="Хлебные крошки">
+        <span class="breadcrumbs__item">Главная</span>
+        <span class="breadcrumbs__separator">/</span>
+        <a class="breadcrumbs__item" href="/admin">Панель отдела образования</a>
+        <span class="breadcrumbs__separator">/</span>
+        <span class="breadcrumbs__item breadcrumbs__item_state_current" aria-current="page">
+          Управление системой
+        </span>
+      </nav>
+
+      <section class="manage">
+        <div class="manage__head">
+          <div>
+            <p class="manage__eyebrow">Административная панель</p>
+            <h1 class="manage__title">Управление системой</h1>
+            <p class="manage__lead">
+              Отчёты, пользователи, журнал действий и резервное копирование.
+            </p>
+            <p class="manage__user">
+              Вы вошли как <strong id="adminName">—</strong>
+            </p>
+          </div>
+          <div class="manage__actions">
+            <a class="button button_view_outline" href="/admin">Сводная ведомость</a>
+            <button id="adminLogout" class="button button_view_outline" type="button">
+              Выйти
+            </button>
+          </div>
+        </div>
+
+        <div id="manageError" class="notice notice_type_error" role="alert" hidden></div>
+
+        <div class="manage__stats">
+          <article class="stat">
+            <span class="stat__label">Учреждений</span>
+            <strong class="stat__value" id="statSchools">—</strong>
+          </article>
+          <article class="stat">
+            <span class="stat__label">Пользователей</span>
+            <strong class="stat__value" id="statUsers">—</strong>
+          </article>
+          <article class="stat">
+            <span class="stat__label">Отчётов всего</span>
+            <strong class="stat__value" id="statReports">—</strong>
+          </article>
+          <article class="stat">
+            <span class="stat__label">Отчётов за сегодня</span>
+            <strong class="stat__value" id="statToday">—</strong>
+          </article>
+        </div>
+
+        <nav class="manage__nav" aria-label="Разделы панели управления">
+          <button class="manage__tab manage__tab_state_active" type="button" data-section="reports">
+            Отчёты
+          </button>
+          <button class="manage__tab" type="button" data-section="users">
+            Пользователи
+          </button>
+          <button class="manage__tab" type="button" data-section="audit">
+            Журнал действий
+          </button>
+          <button class="manage__tab" type="button" data-section="backup">
+            Резервное копирование
+          </button>
+        </nav>
+
+        <section id="sectionReports" class="manage__section" aria-labelledby="reportsTitle">
+          <div class="manage__section-head">
+            <h2 class="manage__section-title" id="reportsTitle">Отчёты учреждений</h2>
+            <div class="manage__toolbar">
+              <button id="reportCreate" class="button button_view_primary" type="button">
+                Добавить отчёт
+              </button>
+              <a id="exportReports" class="button button_view_outline" href="/api/admin/reports/export">
+                Выгрузить CSV
+              </a>
+            </div>
+          </div>
+
+          <form id="reportFilterForm" class="form filter" novalidate>
+            <div class="filter__grid">
+              <div class="form__field">
+                <label class="form__label" for="filterFrom">С даты</label>
+                <input class="form__input" type="date" id="filterFrom">
+              </div>
+              <div class="form__field">
+                <label class="form__label" for="filterTo">По дату</label>
+                <input class="form__input" type="date" id="filterTo">
+              </div>
+              <div class="form__field">
+                <label class="form__label" for="filterSchool">Учреждение</label>
+                <select class="form__input" id="filterSchool">
+                  <option value="">Все учреждения</option>
+                </select>
+              </div>
+              <div class="form__field">
+                <label class="form__label" for="filterQuery">Поиск</label>
+                <input
+                  class="form__input"
+                  type="search"
+                  id="filterQuery"
+                  placeholder="Название учреждения или дата"
+                >
+              </div>
+            </div>
+            <div class="filter__actions">
+              <button class="button button_view_primary" type="submit">Применить</button>
+              <button id="filterReset" class="button button_view_outline" type="button">
+                Сбросить
+              </button>
+            </div>
+          </form>
+
+          <div class="manage__table-wrap">
+            <table class="admin-table">
+              <caption class="visually-hidden">Список отчётов учреждений</caption>
+              <thead>
+                <tr>
+                  <th scope="col" class="admin-table__head-cell">ID</th>
+                  <th scope="col" class="admin-table__head-cell">Дата</th>
+                  <th scope="col" class="admin-table__head-cell">Учреждение</th>
+                  <th scope="col" class="admin-table__head-cell admin-table__head-cell_type_number">Нач. классы</th>
+                  <th scope="col" class="admin-table__head-cell admin-table__head-cell_type_number">Льготники</th>
+                  <th scope="col" class="admin-table__head-cell admin-table__head-cell_type_number">Плательщики</th>
+                  <th scope="col" class="admin-table__head-cell admin-table__head-cell_type_actions">Действия</th>
+                </tr>
+              </thead>
+              <tbody id="reportsBody">
+                <tr class="admin-table__row">
+                  <td class="admin-table__cell admin-table__cell_type_empty" colspan="7">
+                    Загрузка данных…
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <form id="reportEditForm" class="form manage__form" novalidate hidden>
+            <h3 class="manage__form-title" id="reportFormTitle">Новый отчёт</h3>
+            <input type="hidden" id="reportId">
+
+            <div class="form__grid">
+              <div class="form__field">
+                <label class="form__label" for="reportSchool">Учреждение</label>
+                <select class="form__input" id="reportSchool" required></select>
+              </div>
+              <div class="form__field">
+                <label class="form__label" for="reportDate">Дата отчёта</label>
+                <input class="form__input" type="date" id="reportDate" required>
+              </div>
+              <div class="form__field">
+                <label class="form__label" for="reportPrimaryHot">
+                  Начальные классы с горячим питанием
+                </label>
+                <input
+                  class="form__input"
+                  type="number"
+                  id="reportPrimaryHot"
+                  min="0"
+                  max="100000"
+                  step="1"
+                  required
+                >
+              </div>
+              <div class="form__field">
+                <label class="form__label" for="reportBeneficiaries">Льготники</label>
+                <input
+                  class="form__input"
+                  type="number"
+                  id="reportBeneficiaries"
+                  min="0"
+                  max="100000"
+                  step="1"
+                  required
+                >
+              </div>
+              <div class="form__field">
+                <label class="form__label" for="reportPaying">Плательщики</label>
+                <input
+                  class="form__input"
+                  type="number"
+                  id="reportPaying"
+                  min="0"
+                  max="100000"
+                  step="1"
+                  required
+                >
+              </div>
+            </div>
+
+            <p id="reportFormError" class="form__error" role="alert" hidden></p>
+
+            <div class="manage__form-actions">
+              <button type="submit" id="reportSave" class="button button_view_primary">
+                Сохранить
+              </button>
+              <button type="button" id="reportCancel" class="button button_view_outline">
+                Отмена
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <section id="sectionUsers" class="manage__section" aria-labelledby="usersTitle" hidden>
+          <div class="manage__section-head">
+            <h2 class="manage__section-title" id="usersTitle">Пользователи и роли</h2>
+            <div class="manage__toolbar">
+              <button id="userCreate" class="button button_view_primary" type="button">
+                Добавить пользователя
+              </button>
+            </div>
+          </div>
+
+          <form id="userFilterForm" class="form filter" novalidate>
+            <div class="filter__grid filter__grid_type_users">
+              <div class="form__field">
+                <label class="form__label" for="userQuery">Поиск</label>
+                <input
+                  class="form__input"
+                  type="search"
+                  id="userQuery"
+                  placeholder="Имя или логин"
+                >
+              </div>
+            </div>
+            <div class="filter__actions">
+              <button class="button button_view_primary" type="submit">Найти</button>
+              <button id="userReset" class="button button_view_outline" type="button">
+                Сбросить
+              </button>
+            </div>
+          </form>
+
+          <div class="manage__table-wrap">
+            <table class="admin-table">
+              <caption class="visually-hidden">Список пользователей системы</caption>
+              <thead>
+                <tr>
+                  <th scope="col" class="admin-table__head-cell">ID</th>
+                  <th scope="col" class="admin-table__head-cell">Название / имя</th>
+                  <th scope="col" class="admin-table__head-cell">Логин</th>
+                  <th scope="col" class="admin-table__head-cell">Роль</th>
+                  <th scope="col" class="admin-table__head-cell">Статус</th>
+                  <th scope="col" class="admin-table__head-cell">Создан</th>
+                  <th scope="col" class="admin-table__head-cell admin-table__head-cell_type_actions">Действия</th>
+                </tr>
+              </thead>
+              <tbody id="usersBody">
+                <tr class="admin-table__row">
+                  <td class="admin-table__cell admin-table__cell_type_empty" colspan="7">
+                    Загрузка данных…
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <form id="userEditForm" class="form manage__form" novalidate hidden>
+            <h3 class="manage__form-title" id="userFormTitle">Новый пользователь</h3>
+            <input type="hidden" id="userId">
+
+            <div class="form__grid">
+              <div class="form__field">
+                <label class="form__label" for="userName">Название организации или имя</label>
+                <input class="form__input" type="text" id="userName" maxlength="200" required>
+              </div>
+              <div class="form__field">
+                <label class="form__label" for="userLogin">Логин</label>
+                <input
+                  class="form__input"
+                  type="text"
+                  id="userLogin"
+                  maxlength="50"
+                  autocomplete="off"
+                  required
+                >
+              </div>
+              <div class="form__field">
+                <label class="form__label" for="userPassword">Пароль</label>
+                <input
+                  class="form__input"
+                  type="password"
+                  id="userPassword"
+                  minlength="6"
+                  autocomplete="new-password"
+                  placeholder="Оставьте пустым, чтобы не менять"
+                >
+              </div>
+              <div class="form__field">
+                <label class="form__label" for="userRole">Роль</label>
+                <select class="form__input" id="userRole">
+                  <option value="school">Учреждение</option>
+                  <option value="admin">Администратор</option>
+                </select>
+              </div>
+              <div class="form__field form__field_type_checkbox">
+                <label class="form__label" for="userActive">
+                  <input type="checkbox" id="userActive" checked>
+                  Учётная запись активна
+                </label>
+              </div>
+            </div>
+
+            <p id="userFormError" class="form__error" role="alert" hidden></p>
+
+            <div class="manage__form-actions">
+              <button type="submit" id="userSave" class="button button_view_primary">
+                Сохранить
+              </button>
+              <button type="button" id="userCancel" class="button button_view_outline">
+                Отмена
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <section id="sectionAudit" class="manage__section" aria-labelledby="auditTitle" hidden>
+          <div class="manage__section-head">
+            <h2 class="manage__section-title" id="auditTitle">Журнал действий</h2>
+          </div>
+
+          <form id="auditFilterForm" class="form filter" novalidate>
+            <div class="filter__grid filter__grid_type_users">
+              <div class="form__field">
+                <label class="form__label" for="auditQuery">Поиск</label>
+                <input
+                  class="form__input"
+                  type="search"
+                  id="auditQuery"
+                  placeholder="Пользователь, действие, подробности"
+                >
+              </div>
+            </div>
+            <div class="filter__actions">
+              <button class="button button_view_primary" type="submit">Найти</button>
+              <button id="auditReset" class="button button_view_outline" type="button">
+                Сбросить
+              </button>
+            </div>
+          </form>
+
+          <div class="manage__table-wrap">
+            <table class="admin-table">
+              <caption class="visually-hidden">Журнал действий пользователей</caption>
+              <thead>
+                <tr>
+                  <th scope="col" class="admin-table__head-cell">Дата и время</th>
+                  <th scope="col" class="admin-table__head-cell">Пользователь</th>
+                  <th scope="col" class="admin-table__head-cell">Действие</th>
+                  <th scope="col" class="admin-table__head-cell">Подробности</th>
+                </tr>
+              </thead>
+              <tbody id="auditBody">
+                <tr class="admin-table__row">
+                  <td class="admin-table__cell admin-table__cell_type_empty" colspan="4">
+                    Загрузка данных…
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="sectionBackup" class="manage__section" aria-labelledby="backupTitle" hidden>
+          <div class="manage__section-head">
+            <h2 class="manage__section-title" id="backupTitle">Резервное копирование</h2>
+          </div>
+
+          <p class="manage__note">
+            Скачайте согласованную копию базы данных. Файл создаётся командой
+            <code>VACUUM INTO</code> и не требует остановки сервера.
+          </p>
+
+          <div class="manage__toolbar">
+            <a id="backupDownload" class="button button_view_primary" href="/api/admin/backup">
+              Скачать резервную копию
+            </a>
+            <button id="integrityCheck" class="button button_view_outline" type="button">
+              Проверить целостность
+            </button>
+          </div>
+
+          <div id="integrityResult" class="notice" role="status" hidden></div>
+
+          <h3 class="manage__subtitle">Восстановление базы данных</h3>
+          <ol class="manage__list">
+            <li>Остановите сервер.</li>
+            <li>Выполните команду <code>npm run db:restore -- путь\к\файлу.db</code>.</li>
+            <li>Запустите сервер командой <code>npm start</code>.</li>
+          </ol>
+          <p class="manage__note">
+            Скрипт восстановления создаёт резервную копию текущей базы,
+            проверяет целостность и только затем заменяет файл.
+          </p>
+        </section>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="footer__text">
+        МКУ «Отдел образования администрации<br>
+        Зейского муниципального округа»
+      </p>
+      <p class="footer__note">
+        Внутренний портал · 2026
+      </p>
+    </div>
+  </footer>
+</body>
+</html>
