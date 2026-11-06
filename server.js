@@ -458,12 +458,13 @@ app.get('/api/auth/me', (req, res) => {
   const user = req.currentUser;
 
   if (!user) {
-    return res.json({ authenticated: false, today });
+    return res.json({ authenticated: false, today, timezone: APP_TIMEZONE });
   }
 
   const payload = {
     authenticated: true,
     today,
+    timezone: APP_TIMEZONE,
     user: { id: user.id, name: user.name, role: user.role },
   };
 
@@ -850,6 +851,16 @@ app.put('/api/admin/users/:id', requireAdmin, (req, res, next) => {
   ) {
     return res.status(400).json({
       error: 'Нельзя отключить или понизить последнего администратора.',
+    });
+  }
+
+  if (
+    existing.role === 'school' &&
+    payload.role !== 'school' &&
+    countUserReports(id) > 0
+  ) {
+    return res.status(409).json({
+      error: 'У учреждения есть отчёты. Нельзя изменить его роль.',
     });
   }
 
