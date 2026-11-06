@@ -210,6 +210,11 @@ async function loadSession() {
     state.today = data.today;
   }
 
+  if (data.authenticated && data.user && data.user.role === 'admin') {
+    window.location.href = '/admin/manage';
+    return;
+  }
+
   if (data.authenticated) {
     renderReport(data);
   } else {
