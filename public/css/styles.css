@@ -370,6 +370,10 @@ input:focus-visible {
   line-height: 1.5;
 }
 
+.auth__link {
+  text-decoration: underline;
+}
+
 .auth__panel {
   padding: 32px;
   border: 1px solid var(--line);
@@ -1194,7 +1198,8 @@ input:focus-visible {
   font-size: 13px;
 }
 
-.admin-table__cell_type_role {
+.admin-table__cell_type_role,
+.admin-table__cell_type_action {
   font-size: 13px;
   font-weight: 700;
 }
