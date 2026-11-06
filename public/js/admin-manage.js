@@ -5,6 +5,7 @@
 const state = {
   user: null,
   today: '',
+  timezone: 'Asia/Yakutsk',
   schools: [],
   reports: [],
   users: [],
@@ -148,7 +149,7 @@ function formatDateTime(value) {
   if (Number.isNaN(date.getTime())) return text;
 
   return date.toLocaleString('ru-RU', {
-    timeZone: 'Asia/Yakutsk',
+    timeZone: state.timezone,
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -734,7 +735,7 @@ function renderAudit() {
 
     row.appendChild(createCell(formatDateTime(entry.createdAt), 'admin-table__cell_type_date'));
     row.appendChild(createCell(entry.userName, 'admin-table__cell_type_name'));
-    row.appendChild(createCell(ACTION_LABELS[entry.action] || entry.action, 'admin-table__cell_type_role'));
+    row.appendChild(createCell(ACTION_LABELS[entry.action] || entry.action, 'admin-table__cell_type_action'));
     row.appendChild(createCell(entry.details || '—', 'admin-table__cell_type_details'));
 
     fragment.appendChild(row);
@@ -920,6 +921,7 @@ function setupEvents() {
 
     state.user = data.user;
     state.today = data.today;
+    state.timezone = data.timezone || 'Asia/Yakutsk';
     els.adminName.textContent = data.user.name;
 
     await loadSchools();
