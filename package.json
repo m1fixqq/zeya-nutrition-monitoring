@@ -1,0 +1,19 @@
+{
+  "name": "zeya-nutrition-monitoring",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Мониторинг горячего и льготного питания в образовательных организациях Зейского муниципального округа",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "db:reset": "node scripts/reset-db.js"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "express-session": "^1.18.1"
+  }
+}

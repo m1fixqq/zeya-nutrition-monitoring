@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: zeya-nutrition-monitoring
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: NODE_ENV
+        value: production
+      - key: APP_TIMEZONE
+        value: Asia/Yakutsk
+      - key: SESSION_SECRET
+        generateValue: true
