@@ -15,5 +15,6 @@
     }
   },
   "postCreateCommand": "npm install && npm run db:demo",
-  "postStartCommand": "nohup npm start > /tmp/zeya-nutrition.log 2>&1 &"
+  "postStartCommand": "bash scripts/start-codespace.sh",
+  "postAttachCommand": "bash scripts/start-codespace.sh"
 }
