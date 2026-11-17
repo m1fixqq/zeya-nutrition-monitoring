@@ -4,6 +4,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 const express = require('express');
 const session = require('express-session');
+const compression = require('compression');
+
+const { SqliteSessionStore } = require('./session-store');
 
 const {
   db,
@@ -85,12 +88,14 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(compression());
 app.use(express.json({ limit: '16kb' }));
 
 app.use(
   session({
     name: 'zeya.sid',
     secret: SESSION_SECRET,
+    store: new SqliteSessionStore(),
     resave: false,
     saveUninitialized: false,
     rolling: true,
@@ -980,10 +985,8 @@ app.get(['/admin', '/admin/'], (req, res) => {
 });
 
 app.get('/admin/login', (req, res) => {
-  if (req.currentUser && req.currentUser.role === 'admin') {
-    return res.redirect('/admin/manage');
-  }
-
+  // Страница входа всегда доступна. Если сессия ещё действует,
+  // клиентский скрипт сам перейдёт в панель управления.
   res.sendFile(path.join(PUBLIC_DIR, 'admin-login.html'));
 });
 
@@ -1007,7 +1010,20 @@ app.get('/admin-manage.html', (req, res) => {
   res.redirect(301, '/admin/manage');
 });
 
-app.use(express.static(PUBLIC_DIR, { index: 'index.html' }));
+app.use(
+  express.static(PUBLIC_DIR, {
+    index: 'index.html',
+    setHeaders(res, filePath) {
+      if (/\.(css|js)$/i.test(filePath)) {
+        res.setHeader('Cache-Control', 'public, max-age=60, must-revalidate');
+      } else if (/\.(svg|png|ico|woff2?)$/i.test(filePath)) {
+        res.setHeader('Cache-Control', 'public, max-age=86400');
+      } else {
+        res.setHeader('Cache-Control', 'no-cache');
+      }
+    },
+  })
+);
 
 app.use('/api', (req, res) => {
   res.status(404).json({ error: 'Метод API не найден.' });
