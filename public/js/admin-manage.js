@@ -97,6 +97,7 @@ const ACTION_LABELS = {
   user_delete: 'Удаление пользователя',
   backup_download: 'Резервная копия',
   integrity_check: 'Проверка целостности',
+  demo_seed: 'Загрузка демо-данных',
 };
 
 const ROLE_LABELS = {
