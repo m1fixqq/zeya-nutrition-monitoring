@@ -88,7 +88,12 @@ function clearInvalidState() {
   }
 }
 
-async function api(url, options = {}) {
+function delay(ms) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+async function api(url, options = {}, attempt = 0) {
+  const method = String(options.method || 'GET').toUpperCase();
   const headers = {
     Accept: 'application/json',
     ...(options.headers || {}),
@@ -98,6 +103,8 @@ async function api(url, options = {}) {
     headers['Content-Type'] = 'application/json';
   }
 
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 15000);
   let response;
 
   try {
@@ -106,13 +113,23 @@ async function api(url, options = {}) {
       headers,
       cache: 'no-store',
       credentials: 'same-origin',
+      signal: controller.signal,
     });
-  } catch {
+  } catch (error) {
+    if (method === 'GET' && attempt < 1) {
+      await delay(500 * (attempt + 1));
+      return api(url, options, attempt + 1);
+    }
+
     const networkError = new Error(
-      'Нет связи с сервером. Проверьте подключение и обновите страницу.'
+      error.name === 'AbortError'
+        ? 'Сервер не ответил вовремя. Проверьте подключение и повторите попытку.'
+        : 'Нет связи с сервером. Проверьте подключение и обновите страницу.'
     );
     networkError.status = 0;
     throw networkError;
+  } finally {
+    window.clearTimeout(timeout);
   }
 
   let data = null;
@@ -124,11 +141,24 @@ async function api(url, options = {}) {
   }
 
   if (!response.ok) {
+    if (response.status >= 500 && method === 'GET' && attempt < 1) {
+      await delay(500 * (attempt + 1));
+      return api(url, options, attempt + 1);
+    }
+
     const requestError = new Error(
       (data && data.error) || 'Не удалось выполнить запрос. Попробуйте ещё раз.'
     );
     requestError.status = response.status;
     throw requestError;
+  }
+
+  if (data === null) {
+    const emptyError = new Error(
+      'Сервер вернул пустой ответ. Обновите страницу и повторите попытку.'
+    );
+    emptyError.status = response.status;
+    throw emptyError;
   }
 
   return data;

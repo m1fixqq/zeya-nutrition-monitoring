@@ -12,6 +12,8 @@ const state = {
   audit: [],
   reportEditingId: null,
   userEditingId: null,
+  usersLoaded: false,
+  auditLoaded: false,
 };
 
 const els = {
@@ -207,7 +209,12 @@ function createEmptyRow(colspan, text) {
   return row;
 }
 
-async function api(url, options = {}) {
+function delay(ms) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+async function api(url, options = {}, attempt = 0) {
+  const method = String(options.method || 'GET').toUpperCase();
   const headers = {
     Accept: 'application/json',
     ...(options.headers || {}),
@@ -217,6 +224,8 @@ async function api(url, options = {}) {
     headers['Content-Type'] = 'application/json';
   }
 
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 15000);
   let response;
 
   try {
@@ -225,13 +234,23 @@ async function api(url, options = {}) {
       headers,
       cache: 'no-store',
       credentials: 'same-origin',
+      signal: controller.signal,
     });
-  } catch {
+  } catch (error) {
+    if (method === 'GET' && attempt < 1) {
+      await delay(500 * (attempt + 1));
+      return api(url, options, attempt + 1);
+    }
+
     const networkError = new Error(
-      'Нет связи с сервером. Проверьте подключение и обновите страницу.'
+      error.name === 'AbortError'
+        ? 'Сервер не ответил вовремя. Проверьте подключение и повторите попытку.'
+        : 'Нет связи с сервером. Проверьте подключение и обновите страницу.'
     );
     networkError.status = 0;
     throw networkError;
+  } finally {
+    window.clearTimeout(timeout);
   }
 
   let data = null;
@@ -243,11 +262,24 @@ async function api(url, options = {}) {
   }
 
   if (!response.ok) {
+    if (response.status >= 500 && method === 'GET' && attempt < 1) {
+      await delay(500 * (attempt + 1));
+      return api(url, options, attempt + 1);
+    }
+
     const requestError = new Error(
       (data && data.error) || 'Не удалось выполнить запрос. Попробуйте ещё раз.'
     );
     requestError.status = response.status;
     throw requestError;
+  }
+
+  if (data === null) {
+    const emptyError = new Error(
+      'Сервер вернул пустой ответ. Обновите страницу и повторите попытку.'
+    );
+    emptyError.status = response.status;
+    throw emptyError;
   }
 
   return data;
@@ -262,11 +294,21 @@ function handleApiError(error) {
   showError(error.message);
 }
 
+async function refreshAuditIfLoaded() {
+  if (!state.auditLoaded) return;
+
+  try {
+    await loadAudit();
+  } catch (error) {
+    if (error.status === 401) throw error;
+  }
+}
+
 /* ---------------------------------------------------------------------- Вкладки */
 
 function setupTabs() {
   for (const tab of els.tabs) {
-    tab.addEventListener('click', () => {
+    tab.addEventListener('click', async () => {
       const section = tab.dataset.section;
 
       for (const item of els.tabs) {
@@ -278,6 +320,18 @@ function setupTabs() {
 
       for (const [name, element] of Object.entries(els.sections)) {
         element.hidden = name !== section;
+      }
+
+      try {
+        if (section === 'users' && !state.usersLoaded) {
+          await loadUsers();
+        }
+
+        if (section === 'audit' && !state.auditLoaded) {
+          await loadAudit();
+        }
+      } catch (error) {
+        handleApiError(error);
       }
     });
   }
@@ -384,13 +438,22 @@ function renderReports() {
 }
 
 async function loadReports() {
-  const params = buildReportQuery();
-  const suffix = params.toString() ? `?${params.toString()}` : '';
-  const data = await api(`/api/admin/reports${suffix}`);
+  try {
+    const params = buildReportQuery();
+    const suffix = params.toString() ? `?${params.toString()}` : '';
+    const data = await api(`/api/admin/reports${suffix}`);
 
-  state.reports = data.reports;
-  renderReports();
-  updateExportLink();
+    state.reports = data.reports;
+    renderReports();
+    updateExportLink();
+  } catch (error) {
+    state.reports = [];
+    els.reportsBody.replaceChildren(
+      createEmptyRow(7, 'Не удалось загрузить отчёты. Обновите страницу.')
+    );
+    updateExportLink();
+    throw error;
+  }
 }
 
 function openReportForm(id = null) {
@@ -493,7 +556,11 @@ async function saveReport(event) {
     );
 
     closeReportForm();
-    await Promise.all([loadReports(), loadStats(), loadAudit()]);
+    await Promise.all([
+      loadReports(),
+      loadStats(),
+      refreshAuditIfLoaded(),
+    ]);
   } catch (error) {
     if (error.status === 401) {
       handleApiError(error);
@@ -518,7 +585,11 @@ async function removeReport(id) {
 
   try {
     await api(`/api/admin/reports/${id}`, { method: 'DELETE' });
-    await Promise.all([loadReports(), loadStats(), loadAudit()]);
+    await Promise.all([
+      loadReports(),
+      loadStats(),
+      refreshAuditIfLoaded(),
+    ]);
   } catch (error) {
     handleApiError(error);
   }
@@ -574,12 +645,22 @@ function renderUsers() {
 }
 
 async function loadUsers() {
-  const query = els.userQuery.value.trim();
-  const suffix = query ? `?q=${encodeURIComponent(query)}` : '';
-  const data = await api(`/api/admin/users${suffix}`);
+  try {
+    const query = els.userQuery.value.trim();
+    const suffix = query ? `?q=${encodeURIComponent(query)}` : '';
+    const data = await api(`/api/admin/users${suffix}`);
 
-  state.users = data.users;
-  renderUsers();
+    state.users = data.users;
+    renderUsers();
+    state.usersLoaded = true;
+  } catch (error) {
+    state.users = [];
+    state.usersLoaded = false;
+    els.usersBody.replaceChildren(
+      createEmptyRow(7, 'Не удалось загрузить пользователей. Обновите страницу.')
+    );
+    throw error;
+  }
 }
 
 function openUserForm(id = null) {
@@ -679,7 +760,7 @@ async function saveUser(event) {
       loadUsers(),
       loadSchools(),
       loadStats(),
-      loadAudit(),
+      refreshAuditIfLoaded(),
     ]);
   } catch (error) {
     if (error.status === 401) {
@@ -709,7 +790,7 @@ async function removeUser(id) {
       loadUsers(),
       loadSchools(),
       loadStats(),
-      loadAudit(),
+      refreshAuditIfLoaded(),
     ]);
   } catch (error) {
     handleApiError(error);
@@ -746,16 +827,26 @@ function renderAudit() {
 }
 
 async function loadAudit() {
-  const query = els.auditQuery.value.trim();
-  const params = new URLSearchParams();
+  try {
+    const query = els.auditQuery.value.trim();
+    const params = new URLSearchParams();
 
-  if (query) params.set('q', query);
-  params.set('limit', '200');
+    if (query) params.set('q', query);
+    params.set('limit', '200');
 
-  const data = await api(`/api/admin/audit?${params.toString()}`);
+    const data = await api(`/api/admin/audit?${params.toString()}`);
 
-  state.audit = data.audit;
-  renderAudit();
+    state.audit = data.audit;
+    renderAudit();
+    state.auditLoaded = true;
+  } catch (error) {
+    state.audit = [];
+    state.auditLoaded = false;
+    els.auditBody.replaceChildren(
+      createEmptyRow(4, 'Не удалось загрузить журнал. Обновите страницу.')
+    );
+    throw error;
+  }
 }
 
 /* ------------------------------------------------------------- Целостность */
@@ -775,7 +866,7 @@ async function checkIntegrity() {
       : 'Проверка целостности выявила ошибки. Требуется восстановление из резервной копии.';
     els.integrityResult.hidden = false;
 
-    await loadAudit();
+    await refreshAuditIfLoaded();
   } catch (error) {
     handleApiError(error);
   } finally {
@@ -891,7 +982,9 @@ function setupEvents() {
   els.integrityCheck.addEventListener('click', checkIntegrity);
 
   els.backupDownload.addEventListener('click', () => {
-    window.setTimeout(loadAudit, 1500);
+    window.setTimeout(() => {
+      refreshAuditIfLoaded().catch(() => {});
+    }, 1500);
   });
 
   els.adminLogout.addEventListener('click', async () => {
@@ -915,7 +1008,7 @@ function setupEvents() {
   try {
     const data = await api('/api/auth/me');
 
-    if (!data.authenticated || !data.user || data.user.role !== 'admin') {
+    if (!data || !data.authenticated || !data.user || data.user.role !== 'admin') {
       window.location.href = '/admin/login';
       return;
     }
@@ -925,13 +1018,17 @@ function setupEvents() {
     state.timezone = data.timezone || 'Asia/Yakutsk';
     els.adminName.textContent = data.user.name;
 
-    await loadSchools();
-    await Promise.all([
+    const results = await Promise.allSettled([
+      loadSchools(),
       loadStats(),
       loadReports(),
-      loadUsers(),
-      loadAudit(),
     ]);
+
+    const failed = results.find((result) => result.status === 'rejected');
+
+    if (failed) {
+      handleApiError(failed.reason);
+    }
   } catch (error) {
     handleApiError(error);
   }
