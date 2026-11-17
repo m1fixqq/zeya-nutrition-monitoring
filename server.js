@@ -340,7 +340,7 @@ function clearLoginAttempts(key) {
   loginAttempts.delete(key);
 }
 
-function createLoginHandler(requiredRole) {
+function createLoginHandler(requiredRoles) {
   return (req, res, next) => {
     const login =
       typeof req.body?.login === 'string'
@@ -370,7 +370,7 @@ function createLoginHandler(requiredRole) {
     const user = findUserByLogin(login);
     const valid =
       user &&
-      user.role === requiredRole &&
+      requiredRoles.includes(user.role) &&
       user.isActive &&
       verifyPassword(password, user.password);
 
@@ -382,9 +382,9 @@ function createLoginHandler(requiredRole) {
         action: 'login_failed',
         entity: 'auth',
         details:
-          requiredRole === 'admin'
+          requiredRoles.length === 1 && requiredRoles[0] === 'admin'
             ? 'Неудачный вход в панель управления'
-            : 'Неудачный вход в личный кабинет',
+            : 'Неудачный вход в систему',
       });
 
       return res.status(401).json({ error: 'Неверный логин или пароль.' });
@@ -408,7 +408,7 @@ function createLoginHandler(requiredRole) {
           action: 'login',
           entity: 'auth',
           details:
-            requiredRole === 'admin'
+            user.role === 'admin'
               ? 'Вход в панель управления'
               : 'Вход в личный кабинет',
         });
@@ -424,8 +424,8 @@ function createLoginHandler(requiredRole) {
 
 /* ---------------------------------------------------------------- Авторизация */
 
-app.post('/api/auth/login', createLoginHandler('school'));
-app.post('/api/admin/login', createLoginHandler('admin'));
+app.post('/api/auth/login', createLoginHandler(['school', 'admin']));
+app.post('/api/admin/login', createLoginHandler(['admin']));
 
 app.post('/api/auth/logout', (req, res, next) => {
   const user = req.currentUser;
